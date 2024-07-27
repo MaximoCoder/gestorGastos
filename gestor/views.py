@@ -12,6 +12,7 @@ from decimal import Decimal
 from datetime import date
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+
 # VIEWS
 @login_required
 def home(request):
