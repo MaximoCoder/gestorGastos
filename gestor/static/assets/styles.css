@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap'); /* Nunito font */
+@import url('https://bootswatch.com/5/lumen/bootstrap.min.css');
+
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
+/* LOADER */
+
+/* REGISTRO Y LOGIN */
+.password-container {
+    position: relative;
+}
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.fade-in {
+    opacity: 1;
+    transition: opacity .2s ease;
+}
+.fade-out {
+    opacity: 0;
+}
+
+/* HOME PAGE */
+body {
+    padding-bottom: 60px; 
+}
+
+footer {
+    flex-shrink: 0;
+    height: 60px;
+}
+
+/* ANALISIS */
+.analisis_card {
+    background-color: #F5F7F8;
+    padding-bottom: 20px;
+}
+.gastos_card {
+    background-color: #FFF;
+    margin-bottom: 1rem;
+}
+
+/* NOTIFICATION */
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1050;
+}
+
+/* Estilos personalizados para formularios en dispositivos móviles */
+@media ( min-width: 300px) and  (max-width: 576px ) {
+    .home-container .home{
+        width: 100%;
+    }
+    
+    /* Ajuste para card */
+    .box{
+        width: 50em !important;
+    }
+    .analisis_card {
+        width: 100%;
+        padding: 10px;
+    }
+    .w-50 {
+        width: 100% !important;
+    }
+    .w-75 {
+        width: 100% !important;
+    }
+    .box {
+        width: 100% !important;
+    }
+    .card-body {
+        padding: 1rem;
+    }
+    .card-body div {
+        width: 100%;
+        text-align: center;
+    }
+    .card-body button {
+        width: 100%;
+    }
+    .card-body p {
+        margin: 0.5rem 0;
+    }
+    .gastos_card{
+        width: 100%;
+        margin: 0 auto;
+    }
+    
+    /* Ajuste para las notificaciones de toast */
+    .toast-container {
+        top: 1rem;
+        right: 0.5rem;
+        left: 0.5rem;
+        width: auto;
+    }
+}
+
+/* Ajustes adicionales para tamaños de pantalla mayores */
+@media (min-width: 577px) {
+    /* Ajuste para entradas de formulario */
+    .form-control {
+        margin-bottom: 10px;
+    }
+    
+    /* Asegúrate de que los botones sean responsivos */
+    .btn {
+        margin-bottom: 10px;
+    }
+    
+    /* Ajustes para elementos de selección */
+    .form-select {
+        margin-bottom: 10px;
+    }
+    
+    /* Ajustes para campos de fecha */
+    input[type="date"] {
+        margin-bottom: 10px;
+    }
+    
+    /* Ajuste para los selectores */
+    select {
+        margin-bottom: 10px;
+    }
+    
+    /* Ajuste para las notificaciones de toast */
+    .toast-container {
+        top: 1rem;
+        right: 1rem;
+        left: auto;
+    }
+}

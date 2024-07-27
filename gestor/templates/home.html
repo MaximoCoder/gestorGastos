@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="home-container container text-center mt-4">
+    <div class="home w-50 mx-auto" >  
+        <form action="{% url 'ingreso' %}" method="POST">
+            {% csrf_token %}
+            <h3 class="home-title text-uppercase text-primary fw-bold">Ingresa un Presupuesto Inicial</h3>
+            <input type="number" name="presupuesto" placeholder="$" required class="w-100 form-control mb-2">
+            <button class="btn btn-primary w-100">Guardar Presupuesto</button>
+        </form>
+    </div>
+</div>
+<div></div>
+<footer class=" fixed-bottom text-center text-lg-start bg-body-tertiary text-muted">
+    <!-- Copyright -->
+    <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05);">
+    © 2024 Copyright: Maximo Gonzalez
+    
+    </div>
+    <!-- Copyright -->
+</footer>
+{% endblock %}

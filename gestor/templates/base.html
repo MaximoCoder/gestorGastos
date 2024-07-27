@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>GESTOR DE GASTOS</title>
+    <link rel="stylesheet" type="text/css" href="{% static "assets/styles.css" %}">
+
+</head>
+<body>
+    <div class="text-center bg-primary text-white text-uppercase p-4 d-flex justify-content-between align-items-center">
+        <h1 class="fw-bold">Gestión de gastos</h1>
+    
+        <a href="{% url 'logout' %}" class="text-decoration-none">
+            <button class="btn btn-danger">Cerrar Sesión</button>
+        </a>
+    </div>
+    {% block content %}  
+    {% endblock %}
+    <div class="loader">
+    </div>
+    <!--JQUERY -->
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <!-- Incluir Chart.js desde un CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <!--BOOTSTRAP -->
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <!--MAIN JS-->
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

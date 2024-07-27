@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="toast-container">
+    {% if messages %}
+        {% for message in messages %}
+        <div class="position-fixed bottom-0  end-0 p-3" style="z-index: 11">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-check-circle-fill"></i>
+                <strong class="me-auto">{{ message.tags|title }}</strong>
+                <small>Justo ahora...</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                {{ message }}
+            </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+<div class="analisis_card w-50 mx-auto text-center mt-4">
+    <div class="w-75 mx-auto">  
+        <h1 class="text-uppercase fw-bold color-primary" >Análisis</h1>
+        <div class="card-body w-100 d-flex flex-column align-items-center">
+            <div class="box mb-4" style="height: 200px; width: 350px;">
+                <canvas id="myChart"></canvas>
+            </div>
+            <div class="w-100 d-flex justify-content-evenly mt-4">
+                <div>
+                    <p>Presupuesto: <span class="fw-bold">${{ datos.presupuesto }}</span></p>
+                </div>
+            
+                <div>
+                    <p>Disponible: <span class="fw-bold">${{ datos.disponible }}</span></p>
+                </div>
+                <div>
+                    <p>Gastado: <span class="fw-bold">${{ datos.gastado }}</span></p>
+                </div>   
+            </div>
+            <div class="w-100 d-flex justify-content-around mt-4 mb-4">
+                <button class="btn btn-primary" style="width: 260px;" id="addGastoBtn" data-bs-toggle="modal" data-bs-target="#modalGasto"  >Añadir Gasto</button>
+                <button class="btn btn-primary" style="width: 260px;" id="addMonneyBtn" data-bs-toggle="modal" data-bs-target="#modalMoney" >Añadir Ingreso</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--  FILTRAR GASTOS -->
+<div class="analisis_card w-50 mx-auto text-center mt-4 mb-2" style="height: 180px">
+    <div class="w-75 mx-auto">  
+        <h1 class="text-uppercase fw-bold color-primary" >Filtrar</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <select name="tipo_gasto" class="form-select">
+                <option value="">Todos los tipos</option>
+            {% for tipo in all_types %}
+                <option value="{{ tipo.id_gasto }}">{{ tipo.nombre_gasto }}</option>
+            {% endfor %}
+            </select>
+            <button class="btn btn-primary w-50 mt-3" type="submit" name="filtrar">Filtrar</button>
+        </form>
+    </div>
+</div> 
+<!-- LISTA GASTOS -->
+<div class="analisis_card w-50 mx-auto mt-4 mb-2">
+    <div class=" w-75 mx-auto ">
+        <h1 class="text-uppercase fw-bold color-primary text-center">Gastos</h1>
+    {% if gastos_con_tipos %}
+        {% for gasto in gastos_con_tipos %}
+            <div class="gastos_card mb-3 p-3 border rounded mb-2">
+                <p><strong>Gasto:</strong> {{ gasto.nombre_gasto }}</p>
+                <p><strong>Tipo de Gasto:</strong> {{ gasto.tipo_gasto }}</p>
+                <p><strong>Monto:</strong> ${{ gasto.monto_gasto }}</p>
+                <p><strong>Fecha:</strong> {{ gasto.fecha_gasto }}</p>
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-danger deleteBtn" data-id="{{ gasto.id_gasto }}" data-bs-toggle="modal" data-bs-target="#modalDelete">Eliminar</button>
+                    <button class="btn btn-success editBtn" data-id="{{ gasto.id_gasto }}" data-nombre="{{ gasto.nombre_gasto }}" data-monto="{{ gasto.monto_gasto }}" data-tipo="{{ gasto.tipo_gasto }}" data-fecha="{{ gasto.fecha_gasto }}" data-bs-toggle="modal" data-bs-target="#modalEdit">Editar</button>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center mb-2"><p><strong>Aun no hay gastos registrados</strong></p></div>
+        
+    {% endif %}
+    </div>
+</div>
+
+<br>
+<!-- MODALES -->
+<!-- MODAL AGREGAR INGRESO -->
+<div class="modal fade" id="modalMoney" tabindex="-1" aria-labelledby="modalMoneyLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalMoneyLabel">Añadir nuevo ingreso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="family_code" class="col-form-label">Escribe el monto:</label>
+                        <input type="number" class="form-control" id="presupuesto" name="presupuesto" required>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success" id="sendBtn" name="submitPresupuesto">Guardar</button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+<!-- MODAL AGREGAR GASTO -->
+<div class="modal fade" id="modalGasto" tabindex="-1" aria-labelledby="modalGastoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalGastoLabel">Añadir Nuevo Gasto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="family_code" class="col-form-label">Nombre del gasto:</label>
+                        <input type="text" class="form-control" id="nombre_gasto" name="nombre_gasto" required>
+
+                        <label for="family_code" class="col-form-label">Monto:</label>
+                        <input type="number" class="form-control" id="monto_gasto" name="monto_gasto" required>
+
+                        <label for="family_code" class="col-form-label">Tipo de gasto:</label>
+                        <select class="form-select w-100" id="select_gasto"  name="select_gasto" required>
+                            <option>Salud</option>
+                            <option>Comida</option>
+                            <option>Deudas</option>
+                            <option>Transporte</option>
+                            <option>Recibos</option>
+                            <option>Suscripciones</option>
+                            <option>Entretenimiento</option>
+                            <option>Otros</option>
+                        </select>
+
+                        <label for="family_code" class="col-form-label">Fecha de gasto:</label>
+                        <input type="date" class="form-control" id="date_gasto" name="date_gasto" required>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success" id="sendBtn" name="submitGasto">Guardar</button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ELIMINAR GASTO -->
+<div class="modal fade" id="modalDelete" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEliminarLabel">Eliminar gasto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="id_gasto" id="id_gasto_input">
+                    <div class="mb-3">
+                        <label for="family_name" class="col-form-label">¿Estás seguro que deseas eliminar este gasto? <strong>No podrás recuperarlo.</strong></label>
+                    </div>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-danger" name="deleteGasto">Sí, estoy seguro.</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL EDITAR GASTO -->
+<div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditLabel">Editar Gasto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="gasto_id" id="editGastoId">
+                    <div class="mb-3">
+                        <label for="edit_nombre_gasto" class="col-form-label">Nombre del gasto:</label>
+                        <input type="text" class="form-control" id="edit_nombre_gasto" name="nombre_gasto" required>
+
+                        <label for="edit_monto_gasto" class="col-form-label">Monto:</label>
+                        <input type="number" class="form-control" id="edit_monto_gasto" name="monto_gasto" required>
+
+                        <label for="edit_select_gasto" class="col-form-label">Tipo de gasto:</label>
+                        <select class="form-select w-100" id="edit_select_gasto" name="select_gasto" required>
+                            <option>Salud</option>
+                            <option>Comida</option>
+                            <option>Deudas</option>
+                            <option>Transporte</option>
+                            <option>Recibos</option>
+                            <option>Suscripciones</option>
+                            <option>Entretenimiento</option>
+                            <option>Otros</option>
+                        </select>
+
+                        <label for="edit_date_gasto" class="col-form-label">Fecha de gasto:</label>
+                        <input type="date" class="form-control" id="edit_date_gasto" name="date_gasto" required>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success" name="editGasto">Guardar</button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+<footer class="fixed-bottom text-center text-lg-start bg-body-tertiary text-muted mt-4">
+    <!-- Copyright -->
+    <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05);">
+    © 2024 Copyright: Maximo Gonzalez
+    
+    </div>
+    <!-- Copyright -->
+</footer>
+
+<script>
+    // MODAL AGREGAR INGRESO
+    document.addEventListener('DOMContentLoaded', function() {
+        var myModal = new bootstrap.Modal(document.getElementById('modalMoney'), {
+            keyboard: true
+        });
+
+        // Event listener para abrir el modal
+        var unirBtn = document.getElementById('addMonneyBtn');
+        unirBtn.addEventListener('click', function() {
+            myModal.show();
+        });
+
+        // Event listener para cerrar el modal
+        var modalCloseBtn = document.querySelector('#modalMoney .btn-close');
+        modalCloseBtn.addEventListener('click', function() {
+            myModal.hide();
+        });
+
+        // Event listener para cerrar el modal desde el footer (Cancelar)
+        var modalFooterCloseBtn = document.querySelector('#modalMoney .btn-secondary');
+        modalFooterCloseBtn.addEventListener('click', function() {
+            myModal.hide();
+        });
+
+        // Event listener para limpiar el modal al ocultarse
+        myModal._element.addEventListener('hidden.bs.modal', function () {
+            var ingreso_input = document.getElementById('presupuesto');
+            ingreso_input.value = '';  // Limpiar el input al cerrar el modal
+        });
+    });
+
+    // MODAL AGREGAR Gasto
+    document.addEventListener('DOMContentLoaded', function() {
+        var myModal = new bootstrap.Modal(document.getElementById('modalGasto'), {
+            keyboard: true
+        });
+
+        // Event listener para abrir el modal
+        var addGastoBtn = document.getElementById('addGastoBtn');
+        addGastoBtn.addEventListener('click', function() {
+            myModal.show();
+        });
+
+        // Event listener para cerrar el modal
+        var modalCloseBtn = document.querySelector('#modalGasto .btn-close');
+        modalCloseBtn.addEventListener('click', function() {
+            myModal.hide();
+        });
+
+        // Event listener para cerrar el modal desde el footer (Cancelar)
+        var modalFooterCloseBtn = document.querySelector('#modalGasto .btn-secondary');
+        modalFooterCloseBtn.addEventListener('click', function() {
+            myModal.hide();
+        });
+
+        // Event listener para limpiar todos los inputs al ocultarse
+        myModal._element.addEventListener('hidden.bs.modal', function () {
+            var nombre_gasto = document.getElementById('nombre_gasto');
+            nombre_gasto.value = '';
+
+            var monto_gasto = document.getElementById('monto_gasto');
+            monto_gasto.value = '';  
+
+            var select_gasto = document.getElementById('select_gasto');
+            select_gasto.value = '';
+
+            var date_gasto = document.getElementById('date_gasto');
+            date_gasto.value = '';
+        });
+    });
+
+    // modal ELIMINAR Gasto
+    document.addEventListener('DOMContentLoaded', function() {
+        var myModal3 = new bootstrap.Modal(document.getElementById('modalDelete'), {
+            keyboard: true
+        });
+
+        // Event listener para abrir el modal
+        var deleteBtn = document.getElementById('deleteBtn');
+        deleteBtn.addEventListener('click', function() {
+            myModal3.show();
+        });
+
+        // Event listener para cerrar el modal
+        var modalCloseBtn = document.querySelector('#modalDelete .btn-close');
+        modalCloseBtn.addEventListener('click', function() {
+            myModal3.hide();
+        });
+
+    });
+    // ID FOR deleteBtn
+    document.addEventListener('DOMContentLoaded', function() {
+        var deleteButtons = document.querySelectorAll('.deleteBtn');
+        var idGastoInput = document.getElementById('id_gasto_input');
+    
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                var idGasto = this.getAttribute('data-id');
+                idGastoInput.value = idGasto;
+            });
+        });
+    });
+    // MODAL EDITAR Gasto
+    document.addEventListener('DOMContentLoaded', function() {
+        var myModal4 = new bootstrap.Modal(document.getElementById('modalEdit'), {
+            keyboard: true
+        });
+
+        // Event listener para abrir el modal
+        var editBtn = document.getElementById('editBtn');
+        editBtn.addEventListener('click', function() {
+            myModal4.show();
+        });
+
+        // Event listener para cerrar el modal
+        var modalCloseBtn = document.querySelector('#modalEdit .btn-close');
+        modalCloseBtn.addEventListener('click', function() {
+            myModal4.hide();
+        });
+
+    });
+    // data for modal edit 
+    const editButtons = document.querySelectorAll('.editBtn');
+    const editModal = document.getElementById('modalEdit');
+        editButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const gastoId = button.getAttribute('data-id');
+                const nombreGasto = button.getAttribute('data-nombre');
+                const montoGasto = button.getAttribute('data-monto');
+                const tipoGasto = button.getAttribute('data-tipo');
+                const fechaGasto = button.getAttribute('data-fecha');
+                
+                document.getElementById('editGastoId').value = gastoId;
+                document.getElementById('edit_nombre_gasto').value = nombreGasto;
+                document.getElementById('edit_monto_gasto').value = montoGasto;
+                document.getElementById('edit_select_gasto').value = tipoGasto;
+                document.getElementById('edit_date_gasto').value = fechaGasto;
+            });
+        });
+    // CHART 
+    var presupuesto = {{ datos.presupuesto }};  
+    var gastado = {{ datos.gastado }};          
+ 
+    document.addEventListener('DOMContentLoaded', function () {
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Gastado', 'Disponible'],
+                datasets: [{
+                    data: [gastado, presupuesto - gastado],  // Usar los valores aquí
+                    backgroundColor: ['#17d3e6', '#ffb400'],
+                    hoverBackgroundColor: ['#0ab3c5', '#e0a300']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutoutPercentage: 70,
+                plugins: {
+                    legend: {
+                        display: true
+                    },
+                    tooltip: {
+                        enabled: true
+                    },
+                    datalabels: {
+                        formatter: function(value, context) {
+                            let sum = 0;
+                            let dataArr = context.chart.data.datasets[0].data;
+                            dataArr.map(data => {
+                                sum += data;
+                            });
+                            let percentage = (value * 100 / sum).toFixed(2) + "%";
+                            return percentage;
+                        },
+                        color: '#000',
+                        font: {
+                            size: '16'
+                        },
+                        anchor: 'center',
+                        align: 'center'
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    });
+</script>
+{% endblock %}
